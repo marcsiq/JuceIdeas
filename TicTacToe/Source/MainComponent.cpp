@@ -20,7 +20,7 @@ char playerO = 'O';
 char players[2] = { playerX, playerO};
 int playersWins[2] = { 0,0 };
 
-int currentPlayer = 0;
+int currentPlayer;
 int turns;
 
 bool check3(char a, char b, char c)
@@ -50,13 +50,13 @@ void MainComponent::mouseDown(const MouseEvent& event)
     int x = event.getMouseDownX();
     int y = event.getMouseDownY();
 
-    x = x / (getWidth()/GAME_SIZE);
-    y = y / (getHeight()/GAME_SIZE);
+    x /= (getWidth()/GAME_SIZE);
+    y /= (getHeight()/GAME_SIZE);
 
     if (board[x][y] != playerX && board[x][y] != playerO)
     {
         board[x][y] = players[currentPlayer];
-        currentPlayer = currentPlayer == 0 ? 1 : 0;
+        currentPlayer = 1-currentPlayer;
         turns--;
     }
    
@@ -66,11 +66,10 @@ void MainComponent::mouseDown(const MouseEvent& event)
 
     if (winner != NULL || turns == 0)
     {
-    
         String s;
         if (winner != NULL)
         {
-            playersWins[winner == playerX ? 0 : 1]++;
+            playersWins[winner == playerO]++;
             s << "PLAYER [ " << winner  << " ] WINS\n\n";
             s << " [ " << playerX << " ] --> " << playersWins[0] << " wins" << "\n";
             s << " [ " << playerO << " ] --> " << playersWins[1] << " wins";
@@ -81,10 +80,8 @@ void MainComponent::mouseDown(const MouseEvent& event)
         }
 
         AlertWindow::showMessageBox(AlertWindow::AlertIconType::NoIcon, "GAME FINISHED", s, "Play Again!", this);
-
         reset();
     }
-
 }
 
 //==============================================================================
@@ -165,7 +162,7 @@ void MainComponent::addWinnerPath(int si, int sj, int ei, int ej)
     int w = getWidth() / GAME_SIZE;
     int h = getHeight() / GAME_SIZE;
 
-    int sx=0, sy=0, ex=0, ey=0;
+    int sx, sy, ex, ey;
 
     if (si == ei)
     {
@@ -200,7 +197,6 @@ void MainComponent::addWinnerPath(int si, int sj, int ei, int ej)
         }
     }
 
-
     winnerp.startNewSubPath(sx, sy);
     winnerp.lineTo(ex, ey);
 }
@@ -219,12 +215,12 @@ void MainComponent::updateSymbols(void)
         {
             int x = i * w;
             int y = j * h;
-            char s = board[i][j];
-            if (s == playerO)
+
+            if (board[i][j] == playerO)
             {
                 symbolsO.addEllipse(Rectangle<float>{(float)x + ELEMENTS_PADDING, (float)y + ELEMENTS_PADDING, (float)(w)-2 * ELEMENTS_PADDING, (float)(h)-2 * ELEMENTS_PADDING});
             }
-            else if (s == playerX)
+            else if (board[i][j] == playerX)
             {
                 symbolsX.startNewSubPath(x + ELEMENTS_PADDING, y + ELEMENTS_PADDING);
                 symbolsX.lineTo(x + w - ELEMENTS_PADDING, y + w - ELEMENTS_PADDING);
@@ -244,7 +240,7 @@ void MainComponent::resized()
 
     grid.clear();
 
-    for (int i = 0; i < GAME_SIZE+1; i++)
+    for (int i = 0; i <= GAME_SIZE; i++)
     {
         grid.startNewSubPath(i*w / GAME_SIZE, 0);
         grid.lineTo(i*w / GAME_SIZE, w);
@@ -253,4 +249,6 @@ void MainComponent::resized()
         grid.lineTo(h, i * h / GAME_SIZE);
 
     }
+
+    updateSymbols();
 }
