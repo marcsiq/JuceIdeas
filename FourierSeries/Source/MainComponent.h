@@ -33,6 +33,7 @@ private:
     //==============================================================================
     // Your private member variables go here...
     std::vector< int > arr;
-
+    Slider numComponents;
+    ComboBox type;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
