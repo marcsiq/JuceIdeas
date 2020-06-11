@@ -8,9 +8,16 @@
 
 #include "MainComponent.h"
 
-#define PI 3.141692
-#define MAX_NUM_COMPONENTS 50
-#define MAX_VECTOR_SIZE 300
+#define PI 3.141692f
+
+inline int nadd1(int i) { return (i + 1); }
+inline int nodd(int i) { return (i * 2 + 1); }
+
+inline float squareMult(float n) { return (4 / (n * PI));}
+inline float sawtoothMult(float n) { return (pow(-1, n + 1) * 2.0f / ((float)n * PI)); };
+inline float sawtoothbackMult(float n) { return (2 / (n * PI)); };
+inline float triangleMult(float n) { return (pow(-1, (n - 1) / 2.0f) * 8.0f / (n * PI * n * PI)); };
+
 
 //==============================================================================
 MainComponent::MainComponent()
@@ -18,20 +25,30 @@ MainComponent::MainComponent()
     // Make sure you set the size of the component after
     // you add any child components.
     setSize (700, 400);
-    setFramesPerSecond(60); // This sets the frequency of the update calls.
+    setFramesPerSecond(30); // This sets the frequency of the update calls.
+
+    // hint Label
+    addAndMakeVisible(hint);
+    hint.setJustificationType(Justification::topRight);
+    hint.setBounds(700 - 180 - 50, 30, 180, 100);
+    hint.setFont(Font(15.0f, Font::FontStyleFlags::italic));
+    hint.setMinimumHorizontalScale(1.0f);
 
     addAndMakeVisible(numComponents);
-    numComponents.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    numComponents.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
     numComponents.setTextBoxStyle(Slider::TextBoxLeft, false, 50, 25);
     numComponents.setRange(0, MAX_NUM_COMPONENTS, 1);
     numComponents.setValue(1);
     numComponents.setNumDecimalPlacesToDisplay(0);
-    numComponents.setBounds(250, 20, 120, 25);
+    numComponents.setBounds(220, 30, 200, 25);
+    numComponents.setColour(Slider::ColourIds::thumbColourId, Colours::white);
+    numComponents.addListener(this);
 
     addAndMakeVisible(type);
     type.addItemList({ "Square", "Sawtooth", "Sawtooth back", "Triangle" }, 1);
-    type.setBounds(50, 20, 150, 25);
-    type.setSelectedId(1);
+    type.setBounds(50, 30, 150, 25);
+    type.addListener(this);
+    type.setSelectedId(1, NotificationType::sendNotification);
 
 }
 
@@ -39,102 +56,151 @@ MainComponent::~MainComponent()
 {
 }
 
-//==============================================================================
-void MainComponent::update()
+void MainComponent::updateHint()
 {
-    // This function is called at the frequency specified by the setFramesPerSecond() call
-    // in the constructor. You can use it to update counters, animate values, etc.
+    
+    static Component* c;
+
+    if ( numComponents.isMouseOver())
+    {
+        if (c != (Component*)&numComponents)
+        {
+            hint.setText("Modify the number of Fourier Series components to plot!", NotificationType::dontSendNotification);
+            c = (Component*)&numComponents;
+        }
+    }
+    else if( type.isMouseOver(true))
+    {
+        if (c != (Component*)&type)
+        {
+            hint.setText("Changes the current Fourier Series", NotificationType::dontSendNotification);
+            c = (Component*)&type;
+        }
+    }
+    else if (c != nullptr)
+    {
+        hint.setText("", NotificationType::dontSendNotification);
+        c = nullptr;
+    }
 }
 
 //==============================================================================
-void MainComponent::paint (Graphics& g)
+void MainComponent::update()
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (Colours::black);
 
-    // You can add your drawing code here!
-
-    Rectangle<float> centreArea, circleArea[MAX_NUM_COMPONENTS], pointArea[MAX_NUM_COMPONENTS];
-    Point<float> point, centre;
-    Line<float> dline, line[MAX_NUM_COMPONENTS];
-    Path p;
-    int n;
-    float mult;
-
+    // init drawings
     float x = 200;
-    float y = 220;
+    float y = 240;
+    float radius = 75;
+    float velocity = 0.04f;
+    static std::vector< int > arr;
+
     centre.setXY(x, y);
     centreArea.setSize(5, 5);
     centreArea.setCentre(centre);
-
-    int radius = 70;
-   
-    //init at centre
     point = centre;
-
-    int numDisp = numComponents.getValue();
 
     for (int i = 0; i < numDisp; i++)
     {
-        int wave = type.getSelectedId();
-        if (wave == 1)
-        {
-            // Square
-            n = i * 2 + 1;
-            mult = 4 / (n * PI);
-        }
-        else if (wave == 2)
-        {
-            // Sawtooth
-            n = i + 1;
-            mult = pow(-1, n + 1) * 2.0f / (n * PI);
-        }
-        else if (wave == 3)
-        {
-            // Sawtooth back
-            n = i+1;
-            mult = 2 / (n * PI);
-        }
-        else if (wave == 4)
-        {
-            // Triangle
-            n = i * 2 + 1;
-            mult = pow(-1, (n-1)/2) * 8.0f / (n * PI *n * PI);
-        }
+        int n = genN(i);
+        float mult = genMult(n);
 
         circleArea[i].setSize(abs(mult * radius * 2), abs(mult * radius * 2));
         circleArea[i].setCentre(point);
 
         line[i].setStart(point);
 
-        x += mult * radius * cos(getFrameCounter() * n * 0.04f);
-        y += mult * radius * sin(getFrameCounter() * n * 0.04f);
+        x += mult * radius * cos(getFrameCounter() * n * velocity);
+        y += mult * radius * sin(getFrameCounter() * n * velocity);
 
         point.setXY(x, y);
 
         line[i].setEnd(point);
 
-        pointArea[i].setSize(7, 7);
+        pointArea[i].setSize(3, 3);
         pointArea[i].setCentre(point);
 
     }
+    // last point
+    pointArea[numDisp-1].setSize(7, 7);
+    pointArea[numDisp-1].setCentre(point);
+
     arr.insert(arr.begin(), y);
 
     dline.setStart(point);
     dline.setEnd(400, arr[0]);
-
-    p.startNewSubPath(400, arr[0]);
-
-    for (int i = 1; i < arr.size(); i++)
-    {
-        p.lineTo(400+i, arr[i]);
-    }
 
     if (arr.size() > MAX_VECTOR_SIZE)
     {
         arr.pop_back();
     }
 
+    p.clear();
+    p.startNewSubPath(400, arr[0]);
+
+    for (int i = 1; i < arr.size(); i++)
+    {
+        p.lineTo(400 + i, arr[i]);
+    }
+
+    updateHint();
+
+}
+
+
+//==============================================================================
+void MainComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &type)
+    {
+        switch (type.getSelectedId())
+        {
+        case 1:
+        {
+            // Square
+            genN = &nodd;
+            genMult = &squareMult;
+            break;
+        }
+        case 2:
+        {
+            // Sawtooth
+            genN = &nadd1;
+            genMult = &sawtoothMult;
+            break;
+        }
+        case 3:
+        {
+            // Sawtooth back
+            genN = &nadd1;
+            genMult = &sawtoothbackMult;
+            break;
+        }
+        case 4:
+        {
+            // Triangle
+            genN = &nodd;
+            genMult = &triangleMult;
+            break;
+        }
+        }
+    }
+}
+
+void MainComponent::sliderValueChanged(Slider* slider)
+{
+    if (slider == &numComponents)
+    {
+        numDisp = numComponents.getValue();
+    }
+
+}
+
+//==============================================================================
+void MainComponent::paint (Graphics& g)
+{
+    g.fillAll (Colours::black);
+    
     g.setColour(Colours::white.withAlpha(0.2f));
     for (int i = 0; i < numDisp; i++)
     {
@@ -156,10 +222,9 @@ void MainComponent::paint (Graphics& g)
         g.fillEllipse(pointArea[i]);
     }
 
-
     g.setColour(Colours::antiquewhite);
     g.strokePath(p, PathStrokeType(1.0f));
-
+    
 }
 
 void MainComponent::resized()
