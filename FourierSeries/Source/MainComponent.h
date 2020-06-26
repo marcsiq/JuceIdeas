@@ -38,7 +38,7 @@ private:
     //==============================================================================
     virtual void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
     virtual void sliderValueChanged(Slider* slider) override;
-    void MainComponent::updateHint(void);
+    void updateHint(void);
 
     // Function pointers for computations
     int (*genN)(int);
