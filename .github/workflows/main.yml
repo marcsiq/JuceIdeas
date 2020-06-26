@@ -45,9 +45,8 @@ jobs:
         CXX: ${{ matrix.cxx }}
         CC: ${{ matrix.cc }}
     
-    - name: configure and build
-      uses: lukka/run-cmake@v2
-      with:
-        cmakeAppendedArgs: '-DJUCE_BUILD_EXTRAS=OFF -DJUCE_BUILD_EXAMPLES=OFF'
-        buildWithCMakeArgs: '-- -v'
-        buildDirectory: '${{ github.workspace }}/build/'
+    - name: configure
+      run: cmake -Bbuilds -DJUCE_BUILD_EXTRAS=OFF -DJUCE_BUILD_EXAMPLES=OFF
+    
+    - name: build
+      run: cmake --build builds
