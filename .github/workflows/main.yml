@@ -36,8 +36,16 @@ jobs:
     - name: build
       run: cmake --build builds --config Release
       
-    - name: Upload Artifacts
+    - name: Upload Windows Artifacts
+      if: ${{ runner.os == Windows}}
       uses: actions/upload-artifact@v2
       with:
         name: FourierSeries-${{ matrix.os }}
         path: builds/FourierSeries_artefacts/Release/
+        
+    - name: Upload macOS Artifacts
+      if: ${{ runner.os == macOS}}
+      uses: actions/upload-artifact@v2
+      with:
+        name: FourierSeries-${{ matrix.os }}
+        path: builds/FourierSeries_artefacts/Fourier Series.app
