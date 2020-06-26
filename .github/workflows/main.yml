@@ -48,4 +48,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: FourierSeries-${{ matrix.os }}
-        path: builds/FourierSeries_artefacts/Fourier Series.app
+        path: builds/FourierSeries_artefacts/
