@@ -36,7 +36,8 @@ jobs:
     - name: build
       run: cmake --build builds --config Release
       
-    - uses: actions/download-artifact@v2
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
       with:
-        name: FourierSeries
+        name: FourierSeries-${{ matrix.os }}
         path: builds/FourierSeries_artefacts/Release/
