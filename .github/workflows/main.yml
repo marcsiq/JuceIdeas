@@ -48,7 +48,6 @@ jobs:
     - name: configure and build
       uses: lukka/run-cmake@v2
       with:
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeAppendedArgs: '-DJUCE_BUILD_EXTRAS=OFF -DJUCE_BUILD_EXAMPLES=OFF'
         buildWithCMakeArgs: '-- -v'
         buildDirectory: '${{ github.workspace }}/build/'
