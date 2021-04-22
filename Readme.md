@@ -1,3 +1,6 @@
 # Juce Ideas
 
-![C/C++ CI](https://github.com/marcsiq/JuceIdeas/workflows/C/C++%20CI/badge.svg)
+- Fourier Series: Fourier Series visualisation with circles
+- TicTacToe: TicTacToe game implementation
+- Slimes: Slimes behaviour simulations
+- BandsEQ: Equaliser Plugin 
