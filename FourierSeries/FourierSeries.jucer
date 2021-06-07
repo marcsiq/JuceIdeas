@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="XVuvOO" name="FourierSeries" projectType="guiapp" jucerVersion="5.4.7">
+<JUCERPROJECT id="XVuvOO" name="FourierSeries" projectType="guiapp" displaySplashScreen="1"
+              jucerFormatVersion="1">
   <MAINGROUP id="nuaMgH" name="FourierSeries">
     <GROUP id="{EF8DFA22-A06C-3A50-A600-69637EFF9B20}" name="Source">
       <FILE id="WDLQAG" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
